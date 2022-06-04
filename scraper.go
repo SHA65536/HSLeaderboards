@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// Scraper is the main scraper struct
+// it handles scheduling the different
+// site scraping functions
 type Scraper struct {
 	Sites    []Site
 	Db       *Database
@@ -13,6 +16,8 @@ type Scraper struct {
 	Logger   *log.Logger
 }
 
+// Site is the interface every different game mode
+// implements
 type Site interface {
 	Name() string
 	Initialize(*Scraper, *Database) error
@@ -29,6 +34,7 @@ func MakeScraper(db *Database, logger *log.Logger, cfg *Config) *Scraper {
 	}
 }
 
+// AddSite adds a gamemode scraper to the list
 func (sc *Scraper) AddSite(site Site) {
 	sc.Sites = append(sc.Sites, site)
 }
@@ -43,9 +49,11 @@ func (sc *Scraper) initialize() {
 	}
 }
 
+// Start starts scraping the different sites
+// This is blocking so call this in a goroutine
 func (sc *Scraper) Start() error {
 	sc.initialize()
-	sc.Logger.Println("[Scraper] Scraper Started.")
+	sc.Logger.Println("[Scraper] Scraper Started")
 	for range sc.Schedule.C {
 		for _, site := range sc.Sites {
 			sc.Logger.Printf("[Scraper] Started Scraping %s", site.Name())
@@ -58,6 +66,9 @@ func (sc *Scraper) Start() error {
 	return nil
 }
 
+// Stop stops the scheduler
+// active tasks may take some time stopping
 func (sc *Scraper) Stop() {
+	sc.Logger.Println("[Scraper] Scraper Stopping...")
 	sc.Schedule.Stop()
 }
