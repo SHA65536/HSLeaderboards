@@ -16,8 +16,7 @@ type Scraper struct {
 	Logger   *log.Logger
 }
 
-// Site is the interface every different game mode
-// implements
+// Site is the interface every different game mode implements
 type Site interface {
 	Name() string
 	Initialize(*Scraper, *Database) error

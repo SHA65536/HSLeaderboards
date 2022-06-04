@@ -13,6 +13,9 @@ func main() {
 	l := log.Default()
 	db, _ := hs.MakeDatabase(l, cfg)
 	sc := hs.MakeScraper(db, l, cfg)
+
+	sc.AddSite(hs.MakeBattlegrounds())
+
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 

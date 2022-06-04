@@ -16,7 +16,7 @@ func LoadConfig() *Config {
 	godotenv.Load()
 	var interval = 600
 	val, err := strconv.Atoi(os.Getenv("INTERVAL"))
-	if err != nil {
+	if err == nil && val != 0 {
 		interval = val
 	}
 	return &Config{
