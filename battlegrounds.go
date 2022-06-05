@@ -35,18 +35,20 @@ func (b *Battlegrounds) Name() string {
 }
 
 func (b *Battlegrounds) Initialize(sc *Scraper, db *Database) error {
+	var res *BGResponse
+	var err error
 	b.Sc = sc
 	b.Db = db
 	b.Logger = sc.Logger
 	now := time.Now()
 	// Creating DB tables
-	_, err := db.Session.Exec(battlegrounds_create)
+	_, err = db.Session.Exec(battlegrounds_create)
 	if err != nil {
 		return err
 	}
 	// Getting snapshots for comparison
 	for _, region := range b.Regions {
-		res, err := b.getResponse(region)
+		res, err = b.getResponse(region)
 		if err != nil {
 			return err
 		}
@@ -54,6 +56,7 @@ func (b *Battlegrounds) Initialize(sc *Scraper, db *Database) error {
 		b.CurrSnapshots[region] = res
 		b.PrevSnapshots[region] = res
 	}
+	b.Logger.Printf("[Battlegrounds] Season: %d", res.Season)
 	return err
 }
 
