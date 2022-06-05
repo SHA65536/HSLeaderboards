@@ -13,6 +13,9 @@ import (
 //go:embed queries/create_bg.sql
 var battlegrounds_create string
 
+//go:embed queries/new_bg.sql
+var battlegrounds_new string
+
 type Battlegrounds struct {
 	URL           string
 	Regions       []string
@@ -55,6 +58,7 @@ func (b *Battlegrounds) Initialize(sc *Scraper, db *Database) error {
 func (b *Battlegrounds) Scrape() error {
 	now := time.Now()
 	for _, region := range b.Regions {
+		start := time.Now()
 		res, err := b.getResponse(region)
 		if err != nil {
 			b.Logger.Printf("[Battlegrounds] Failed to get region %s, %s", region, err)
@@ -64,7 +68,7 @@ func (b *Battlegrounds) Scrape() error {
 		new, old := b.saveDifferences(res)
 		b.PrevSnapshots[region] = b.CurrSnapshots[region]
 		b.CurrSnapshots[region] = res
-		b.Logger.Printf("[Battlegrounds] Saved region %s. New: %d, Old: %d", region, new, old)
+		b.Logger.Printf("[Battlegrounds] Saved region %s. New: %d, Old: %d | Took %s", region, new, old, time.Since(start))
 	}
 	return nil
 }
@@ -98,9 +102,59 @@ func (b *Battlegrounds) getResponse(region string) (*BGResponse, error) {
 	return response, err
 }
 
-// TODO: implement comparison and saving
 // saveDifferences compares a snapshot to the last snapshot
 // and saves the differences into database
 func (b *Battlegrounds) saveDifferences(res *BGResponse) (new, old int) {
+	var ok bool
+	for _, newR := range res.BGData.Rows {
+		var curR, oldR BGRow
+
+		// First scrape should always make new points
+		if b.CurrSnapshots[res.Region].Timestamp == b.PrevSnapshots[res.Region].Timestamp {
+			b.newPoint(&newR, res.Timestamp, res.Season, res.Region)
+			continue
+		}
+
+		// Getting info from last snapshot
+		if curR, ok = b.CurrSnapshots[res.Region].BGData.Rows[newR.Name]; !ok {
+			b.newPoint(&newR, res.Timestamp, res.Season, res.Region)
+			continue
+		}
+		// Getting info from one before snapshot
+		if oldR, ok = b.PrevSnapshots[res.Region].BGData.Rows[newR.Name]; !ok {
+			b.newPoint(&newR, res.Timestamp, res.Season, res.Region)
+			continue
+		}
+
+		// Comparing rank and rating
+		if newR.Rank != curR.Rank || newR.Rank != oldR.Rank {
+			b.newPoint(&newR, res.Timestamp, res.Season, res.Region)
+			continue
+		}
+		if newR.Rating != curR.Rating || newR.Rating != oldR.Rating {
+			b.newPoint(&newR, res.Timestamp, res.Season, res.Region)
+			continue
+		}
+
+		// If all failed, update the point
+		b.updatePoint(&newR, res.Timestamp, res.Season, res.Region)
+		old++
+	}
+	new = len(res.BGData.Rows) - old
 	return
+}
+
+func (b *Battlegrounds) newPoint(p *BGRow, t int64, season int, region string) {
+	_, err := b.Db.Session.Exec(battlegrounds_new, t, season, region, p.Name, p.Rank, p.Rating)
+	if err != nil {
+		b.Logger.Fatal(err)
+	}
+}
+
+// TODO: implement updating
+func (b *Battlegrounds) updatePoint(p *BGRow, t int64, season int, region string) {
+	_, err := b.Db.Session.Exec(battlegrounds_new, t, season, region, p.Name, p.Rank, p.Rating)
+	if err != nil {
+		b.Logger.Fatal(err)
+	}
 }
