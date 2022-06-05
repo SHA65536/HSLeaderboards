@@ -10,11 +10,14 @@ import (
 	"time"
 )
 
-//go:embed queries/create_bg.sql
+//go:embed queries/bg_create.sql
 var battlegrounds_create string
 
-//go:embed queries/new_bg.sql
+//go:embed queries/bg_new.sql
 var battlegrounds_new string
+
+//go:embed queries/bg_update.sql
+var battlegrounds_update string
 
 type Battlegrounds struct {
 	URL           string
@@ -151,9 +154,8 @@ func (b *Battlegrounds) newPoint(p *BGRow, t int64, season int, region string) {
 	}
 }
 
-// TODO: implement updating
 func (b *Battlegrounds) updatePoint(p *BGRow, t int64, season int, region string) {
-	_, err := b.Db.Session.Exec(battlegrounds_new, t, season, region, p.Name, p.Rank, p.Rating)
+	_, err := b.Db.Session.Exec(battlegrounds_update, t, season, region, p.Name)
 	if err != nil {
 		b.Logger.Fatal(err)
 	}
