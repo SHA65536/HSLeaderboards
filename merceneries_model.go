@@ -2,6 +2,7 @@ package hsleaderboards
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/tidwall/gjson"
@@ -33,6 +34,7 @@ type MRRow struct {
 func (receiver *MRData) UnmarshalJSON(data []byte) error {
 	var jsonStr = string(data)
 	var rowsData = gjson.Get(jsonStr, "rows").String()
+	var names = map[string]int{}
 	receiver.ID = gjson.Get(jsonStr, "leaderboard_id").String()
 	receiver.Rows = make(map[string]MRRow)
 	rows := make([]MRRow, 0)
@@ -41,6 +43,12 @@ func (receiver *MRData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	for _, row := range rows {
+		if val, ok := names[row.Name]; ok {
+			names[row.Name] = val + 1
+			row.Name = fmt.Sprintf("%s|%d", row.Name, val+1)
+		} else {
+			names[row.Name] = 1
+		}
 		receiver.Rows[row.Name] = row
 	}
 	return nil
