@@ -15,8 +15,9 @@ func main() {
 	sc := hs.MakeScraper(db, l, cfg)
 
 	sc.AddSite(hs.MakeStandard())
-	sc.AddSite(hs.MakeBattlegrounds())
 	sc.AddSite(hs.MakeWild())
+	sc.AddSite(hs.MakeBattlegrounds())
+	sc.AddSite(hs.MakeMerceneries())
 	sc.AddSite(hs.MakeClassic())
 
 	done := make(chan os.Signal, 1)
