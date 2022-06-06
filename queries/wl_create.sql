@@ -6,3 +6,5 @@ CREATE TABLE IF NOT EXISTS "wild" (
     "name"      TEXT NOT NULL,
     "rank" 	    INTEGER NOT NULL
 );
+CREATE INDEX IF NOT EXISTS "ix_wld_name_timestamp"
+ON wild(seasonId, name, timestamp DESC);

@@ -7,3 +7,5 @@ CREATE TABLE IF NOT EXISTS "battlegrounds" (
     "rank" 	    INTEGER NOT NULL,
     "rating" 	INTEGER NOT NULL
 );
+CREATE INDEX IF NOT EXISTS "ix_bgs_name_timestamp"
+ON battlegrounds(seasonId, name, timestamp DESC);

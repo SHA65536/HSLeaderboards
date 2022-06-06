@@ -6,3 +6,5 @@ CREATE TABLE IF NOT EXISTS "standard" (
     "name"      TEXT NOT NULL,
     "rank" 	    INTEGER NOT NULL
 );
+CREATE INDEX IF NOT EXISTS "ix_std_name_timestamp"
+ON standard(seasonId, name, timestamp DESC);

@@ -7,3 +7,5 @@ CREATE TABLE IF NOT EXISTS "merceneries" (
     "rank" 	    INTEGER NOT NULL,
     "rating" 	INTEGER NOT NULL
 );
+CREATE INDEX IF NOT EXISTS "ix_mrc_name_timestamp"
+ON merceneries(seasonId, name, timestamp DESC);
