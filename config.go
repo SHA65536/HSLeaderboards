@@ -15,12 +15,16 @@ type Config struct {
 func LoadConfig() *Config {
 	godotenv.Load()
 	var interval = 600
+	var dbpath = "hearthstone.db"
 	val, err := strconv.Atoi(os.Getenv("INTERVAL"))
 	if err == nil && val != 0 {
 		interval = val
 	}
+	if val := os.Getenv("DB_PATH"); val != "" {
+		dbpath = val
+	}
 	return &Config{
-		DBPath:   os.Getenv("DB_PATH"),
+		DBPath:   dbpath,
 		Interval: interval,
 	}
 }
