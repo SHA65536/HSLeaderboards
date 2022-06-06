@@ -14,8 +14,9 @@ func main() {
 	db, _ := hs.MakeDatabase(l, cfg)
 	sc := hs.MakeScraper(db, l, cfg)
 
+	sc.AddSite(hs.MakeWild())
 	sc.AddSite(hs.MakeStandard())
-	//sc.AddSite(hs.MakeBattlegrounds())
+	sc.AddSite(hs.MakeBattlegrounds())
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
