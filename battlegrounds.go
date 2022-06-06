@@ -96,7 +96,10 @@ func (b *Battlegrounds) getResponse(region string) (*BGResponse, error) {
 	var myClient = &http.Client{Timeout: 10 * time.Second}
 	var response = &BGResponse{}
 	for i := 0; i < b.Retries; i++ {
-		r, _ := myClient.Get(fmt.Sprintf(b.URL, region))
+		r, err := myClient.Get(fmt.Sprintf(b.URL, region))
+		if err != nil {
+			continue
+		}
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			continue

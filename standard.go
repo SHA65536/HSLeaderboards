@@ -108,7 +108,10 @@ func (b *Standard) getResponse(region string) (*STResponse, error) {
 	var response = &STResponse{}
 	var url = fmt.Sprintf(b.URL, region, b.LatestSeason)
 	for i := 0; i < b.Retries; i++ {
-		r, _ := myClient.Get(url)
+		r, err := myClient.Get(url)
+		if err != nil {
+			continue
+		}
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			continue
